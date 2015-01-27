@@ -1,11 +1,11 @@
 {
-  "name": "Chart.HighlightBar.js",
+  "name": "chartjs-highlightedbar",
   "version": "1.0.1",
-  "description": "HighlightBar implementation for Chart.js",
-  "homepage": "https://github.com/nnnick/Chart.js",
+  "description": "HighlightedBar implementation for Chart.js",
+  "homepage": "https://github.com/mallowigi/Chart.HighlightedBar.js",
   "author": "mallowigi",
   "main": [
-    "src/Chart.HighlightBar.js"
+    "src/Chart.HighlightedBar.js"
   ],
   "dependencies": {
     "Chart.js": "1.0.0-beta"
