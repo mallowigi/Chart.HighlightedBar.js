@@ -180,6 +180,7 @@
     activateBar: function (e) {
       var bars = this.getBarsAtEvent(e);
       this.activeBars = bars;
+      return bars;
     },
 
     buildScale: function (labels) {
