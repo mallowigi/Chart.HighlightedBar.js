@@ -1,10 +1,10 @@
 ---
-title: StackedBar Chart
-anchor: stacked-bar-chart
+title: Highlighted Chart
+anchor: highlighted-bar-chart
 ---
 
 ### Introduction
-A stacked bar chart is a way of showing data as bars.
+A regular Bar Chart but with an activateBars method to set clicked bars active
 
 <div class="canvas-holder">
 	<canvas width="250" height="125"></canvas>
@@ -12,7 +12,7 @@ A stacked bar chart is a way of showing data as bars.
 
 ### Example usage
 ```javascript
-var myStackedBarChart = new Chart(ctx).StackedBar(data, options);
+var myHighlightedBarChart = new Chart(ctx).HighlightedBar(data, options);
 ```
 
 ### Data structure
@@ -43,7 +43,8 @@ var data = {
 
 ### Chart Options
 
-These are the customisation options specific to StackedBar charts. These options are merged with the [global chart configuration options](#getting-started-global-chart-configuration), and form the options of the chart.
+These are the customisation options specific to HighlightedBar charts. These options are merged with the [global chart configuration
+options](#getting-started-global-chart-configuration), and form the options of the chart.
 
 ```javascript
 {
@@ -78,21 +79,27 @@ These are the customisation options specific to StackedBar charts. These options
 }
 ```
 
-You can override these for your `Chart` instance by passing a second argument into the `StackedBar` method as an object with the keys you want to override.
+You can override these for your `Chart` instance by passing a second argument into the `HighlightedBar` method as an object with the keys
+you want to override.
 
-For example, we could have a stacked bar chart without a stroke on each bar by doing the following:
+For example, we could have a bar chart without a stroke on each bar by doing the following:
 
 ```javascript
-new Chart(ctx).StackedBar(data, {
+new Chart(ctx).HighlightedBar(data, {
 	barShowStroke: false
 });
 // This will create a chart with all of the default options, merged from the global config,
-//  and the StackedBar chart defaults but this particular instance will have `barShowStroke` set to false.
+//  and the HighlightedBar chart defaults but this particular instance will have `barShowStroke` set to false.
 ```
 
-We can also change these defaults values for each StackedBar type that is created, this object is available at `Chart.defaults.StackedBar`.
+We can also change these defaults values for each StackedBar type that is created, this object is available at `Chart.defaults.HighlightedBar`.
 
 ### Prototype methods
+
+#### .activateBars( event )
+
+This is a subset of `getBarsAtEvent`, but will also set the returned bars as *active*. Then, during repainting, the *active bars* will
+keep their highlighted state.
 
 #### .getBarsAtEvent( event )
 
@@ -100,7 +107,7 @@ Calling `getBarsAtEvent(event)` on your Chart instance passing an argument of an
 
 ```javascript
 canvas.onclick = function(evt){
-	var activeBars = myStackedBarChart.getBarsAtEvent(evt);
+	var activeBars = myHighlightedBarChart.getBarsAtEvent(evt);
 	// => activeBars is an array of bars on the canvas that are at the same position as the click event.
 };
 ```
@@ -112,9 +119,9 @@ This functionality may be useful for implementing DOM based tooltips, or trigger
 Calling `update()` on your Chart instance will re-render the chart with any updated values, allowing you to edit the value of multiple existing points, then render those in one animated render loop.
 
 ```javascript
-myStackedBarChart.datasets[0].bars[2].value = 50;
+myHighlightedBarChart.datasets[0].bars[2].value = 50;
 // Would update the first dataset's value of 'March' to be 50
-myStackedBarChart.update();
+myHighlightedBarChart.update();
 // Calling update now animates the position of March from 90 to 50.
 ```
 
@@ -124,7 +131,7 @@ Calling `addData(valuesArray, label)` on your Chart instance passing an array of
 
 ```javascript
 // The values array passed into addData should be one for each dataset in the chart
-myStackedBarChart.addData([40, 60], "August");
+myHighlightedBarChart.addData([40, 60], "August");
 // The new data will now animate at the end of the chart.
 ```
 
@@ -133,6 +140,6 @@ myStackedBarChart.addData([40, 60], "August");
 Calling `removeData()` on your Chart instance will remove the first value for all datasets on the chart.
 
 ```javascript
-myStackedBarChart.removeData();
+myHighlightedBarChart.removeData();
 // The chart will now animate and remove the first bar
 ```

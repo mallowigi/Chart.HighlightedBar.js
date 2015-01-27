@@ -1,11 +1,11 @@
 {
-  "name": "Chart.StackedBar.js",
+  "name": "Chart.HighlightBar.js",
   "version": "1.0.1",
-  "description": "StackedBar implementation for Chart.js",
+  "description": "HighlightBar implementation for Chart.js",
   "homepage": "https://github.com/nnnick/Chart.js",
-  "author": "Regaddi",
+  "author": "mallowigi",
   "main": [
-    "Chart.StackedBar.js"
+    "src/Chart.HighlightBar.js"
   ],
   "dependencies": {
     "Chart.js": "1.0.0-beta"

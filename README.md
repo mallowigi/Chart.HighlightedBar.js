@@ -1,4 +1,4 @@
-Chart.StackedBar.js
+Chart.HighlightedBar.js
 ===================
 
 *StackedBar plugin for Chart.js* [chartjs.org](http://www.chartjs.org)
@@ -9,7 +9,7 @@ You can find the documentation under `/docs`
 
 ## License
 
-Chart.StackedBar.js is available under the [MIT license](http://opensource.org/licenses/MIT).
+Chart.HighlightedBar.js is available under the [MIT license](http://opensource.org/licenses/MIT).
 
 ## Bugs & issues
 
