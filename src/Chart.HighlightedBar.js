@@ -34,7 +34,7 @@
 
   };
 
-  Chart.Type.Bar.extend({
+  Chart.Type.extend({
     name: "HighlightedBar",
     defaults: defaultConfig,
     initialize: function (data) {
