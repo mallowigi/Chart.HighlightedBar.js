@@ -1,7 +1,7 @@
 Chart.HighlightedBar.js
 ===================
 
-*StackedBar plugin for Chart.js* [chartjs.org](http://www.chartjs.org)
+*Highlighted plugin for Chart.js* [chartjs.org](http://www.chartjs.org)
 
 ## Documentation
 
