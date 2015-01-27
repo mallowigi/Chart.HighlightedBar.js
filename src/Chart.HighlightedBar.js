@@ -283,15 +283,13 @@
       //Draw all the bars for each dataset
       helpers.each(this.datasets, function (dataset, datasetIndex) {
         helpers.each(dataset.bars, function (bar, index) {
-          if (bar.hasValue()) {
-            bar.base = this.scale.endPoint;
-            //Transition then draw
-            bar.transition({
-              x: this.scale.calculateBarX(this.datasets.length, datasetIndex, index),
-              y: this.scale.calculateY(bar.value),
-              width: this.scale.calculateBarWidth(this.datasets.length)
-            }, easingDecimal).draw();
-          }
+          bar.base = this.scale.endPoint;
+          //Transition then draw
+          bar.transition({
+            x: this.scale.calculateBarX(this.datasets.length, datasetIndex, index),
+            y: this.scale.calculateY(bar.value),
+            width: this.scale.calculateBarWidth(this.datasets.length)
+          }, easingDecimal).draw();
         }, this);
 
       }, this);
