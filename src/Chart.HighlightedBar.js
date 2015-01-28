@@ -162,7 +162,9 @@
       var barsArray = [],
           eventPosition = helpers.getRelativePosition(e),
           datasetIterator = function (dataset) {
-            barsArray.push(dataset.bars[barIndex]);
+            var bars = dataset.bars[barIndex];
+            bars.index = barIndex;
+            barsArray.push(bars);
           },
           barIndex;
 
