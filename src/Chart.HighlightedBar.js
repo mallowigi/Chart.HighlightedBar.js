@@ -44,14 +44,20 @@
   Chart.Type.extend({
     name: "HighlightedBar",
     defaults: defaultConfig,
-    initialize: function (data) {
+
+    /**
+     * Initialize the highlightedBar
+     * @param data
+     */
+    initialize: function initialize (data) {
 
       //Expose options as a scope variable here so we can access it in the ScaleClass
       var options = this.options;
 
+      // Override ScaleClass methods
       this.ScaleClass = Chart.Scale.extend({
         offsetGridLines: true,
-        calculateBarX: function (datasetCount, datasetIndex, barIndex) {
+        calculateBarX: function calculateBarX (datasetCount, datasetIndex, barIndex) {
           //Reusable method for calculating the xPosition of a given bar based on datasetIndex & width of the bar
           var xWidth = this.calculateBaseWidth(),
               xAbsolute = this.calculateX(barIndex) - (xWidth / 2),
@@ -59,10 +65,12 @@
 
           return xAbsolute + (barWidth * datasetIndex) + (datasetIndex * options.barDatasetSpacing) + barWidth / 2;
         },
-        calculateBaseWidth: function () {
+
+        calculateBaseWidth: function calculateBaseWidth () {
           return (this.calculateX(1) - this.calculateX(0)) - (2 * options.barValueSpacing);
         },
-        calculateBarWidth: function (datasetCount) {
+
+        calculateBarWidth: function calculateBarWidth (datasetCount) {
           //The padding between datasets is to the right of each bar, providing that there are more than 1 dataset
           var baseWidth = this.calculateBaseWidth() - ((datasetCount - 1) * options.barDatasetSpacing);
 
@@ -70,38 +78,49 @@
         }
       });
 
+      // The chart datasets
       this.datasets = [];
+
+      // NEW: The chart active bars
+      this.activeBars = [];
 
       //Set up tooltip events on the chart
       if (this.options.showTooltips) {
+
+        // on tooltipEvents (click, mouseover, mouseout...)
         helpers.bindEvents(this, this.options.tooltipEvents, function (evt) {
           var activeBars = (evt.type !== 'mouseout') ? this.getBarsAtEvent(evt) : [];
 
+          // For each of the bars, restore their fill and stroke color
           this.eachBars(function (bar) {
             bar.restore(['fillColor', 'strokeColor']);
           });
+
+          // For each of the hovered/clicked bars, set their highlighted color
           helpers.each(activeBars, function (activeBar) {
             activeBar.fillColor = activeBar.highlightFill;
             activeBar.strokeColor = activeBar.highlightStroke;
           });
-          helpers.each(this.activeBars, function (activeBar) {
-            activeBar.fillColor = activeBar.highlightFill;
-            activeBar.strokeColor = activeBar.highlightStroke;
-          });
+
+          // NEW: For each of the activeBars, set their color to highlighted
+          this.highlightActiveBars();
+
+          // Show the tooltip
           this.showTooltip(activeBars);
         });
       }
 
-      //Declare the extension of the default point, to cater for the options passed in to the constructor
+      // Define the BarClass as a Rectangle
       this.BarClass = Chart.Rectangle.extend({
         strokeWidth: this.options.barStrokeWidth,
         showStroke: this.options.barShowStroke,
         ctx: this.chart.ctx
       });
 
-      //Iterate through each of the datasets, and build this into a property of the chart
+      // Iterate through each of the datasets, and build the bars
       helpers.each(data.datasets, function (dataset, datasetIndex) {
 
+        // A DataSetObject contains a label, a fillColor and a strokeColor, and of course the bars that will contain the BarClasses
         var datasetObject = {
           label: dataset.label || null,
           fillColor: dataset.fillColor,
@@ -111,9 +130,12 @@
 
         this.datasets.push(datasetObject);
 
+        // Build the Bars
         helpers.each(dataset.data, function (dataPoint, index) {
-          //Add a new point for each piece of data, passing any required data to draw.
+
+          // A BarClass contain: a value, index and label, plus the dataset properties for easy access
           datasetObject.bars.push(new this.BarClass({
+            index: index,
             value: dataPoint,
             label: data.labels[index],
             datasetLabel: dataset.label,
@@ -126,39 +148,61 @@
 
       }, this);
 
+      // Build the scale with the given labels
       this.buildScale(data.labels);
 
       this.BarClass.prototype.base = this.scale.endPoint;
 
+      // For each bar, add also the width, x and y
       this.eachBars(function (bar, index, datasetIndex) {
         helpers.extend(bar, {
           width: this.scale.calculateBarWidth(this.datasets.length),
           x: this.scale.calculateBarX(this.datasets.length, datasetIndex, index),
           y: this.scale.endPoint
         });
+
+        // Keep an instance of the bar for easy revert
         bar.save();
       }, this);
 
       this.render();
     },
-    update: function () {
+
+    /**
+     * Update the chart
+     */
+    update: function update () {
       this.scale.update();
+
       // Reset any highlight colours before updating.
       helpers.each(this.activeElements, function (activeElement) {
         activeElement.restore(['fillColor', 'strokeColor']);
       });
 
+      // Update save
       this.eachBars(function (bar) {
         bar.save();
       });
+
       this.render();
     },
-    eachBars: function (callback) {
+
+    /**
+     * Helper utility to loop over the bars
+     * @param callback
+     */
+    eachBars: function eachBars (callback) {
       helpers.each(this.datasets, function (dataset, datasetIndex) {
         helpers.each(dataset.bars, callback, this, datasetIndex);
       }, this);
     },
-    getBarsAtEvent: function (e) {
+
+    /**
+     * Get the bars at the DOM even
+     * @param {Event} e DOM Event, or jQuery Event
+     * @returns {Array}
+     */
+    getBarsAtEvent: function getBarsAtEvent (e) {
       var barsArray = [],
           eventPosition = helpers.getRelativePosition(e),
           datasetIterator = function (dataset) {
@@ -179,13 +223,60 @@
 
       return barsArray;
     },
-    activateBar: function (e) {
+
+    /**
+     * Add the bars targeted by the event to the activeBars list
+     * @param {Event} e DOM Event or jQuery Event
+     * @returns {Array}
+     */
+    activateBars: function activateBars (e) {
       var bars = this.getBarsAtEvent(e);
       this.activeBars = bars;
+
+      // Trigger highlighting active bars
+      this.highlightActiveBars();
       return bars;
     },
 
-    buildScale: function (labels) {
+    /**
+     * Add the bars targeted by the event to the activeBars list, or remove it if it was already in it.
+     * @param e
+     * @returns {Array}
+     */
+    toggleBars: function toggleBars (e) {
+      var bars = this.getBarsAtEvent(e),
+          activeBars = this.activeBars;
+
+      helpers.each(bars, function addOrRemoveFromActiveBars (bar) {
+        var i;
+
+        if ((i = activeBars.indexOf(bar)) > -1) {
+          activeBars.splice(i, 1);
+        } else {
+          activeBars.splice(0, activeBars.length, bar);
+        }
+      });
+
+      this.highlightActiveBars();
+      return bars;
+    },
+
+    /**
+     * For each active bar, highlight it
+     */
+    highlightActiveBars: function highlightActiveBars () {
+      helpers.each(this.activeBars, function (activeBar) {
+        activeBar.restore(['fillColor', 'strokeColor']);
+        activeBar.fillColor = activeBar.highlightFill;
+        activeBar.strokeColor = activeBar.highlightStroke;
+      });
+    },
+
+    /**
+     * Build the scale
+     * @param labels
+     */
+    buildScale: function buildScale (labels) {
       var self = this;
 
       var dataTotal = function () {
@@ -243,7 +334,13 @@
 
       this.scale = new this.ScaleClass(scaleOptions);
     },
-    addData: function (valuesArray, label) {
+
+    /**
+     * Add a new column to the chart
+     * @param valuesArray
+     * @param label
+     */
+    addData: function addData (valuesArray, label) {
       //Map the values array for each of the datasets
       helpers.each(valuesArray, function (value, datasetIndex) {
         //Add a new point for each piece of data, passing any required data to draw.
@@ -263,6 +360,10 @@
       //Then re-render the chart.
       this.update();
     },
+
+    /**
+     * Remove the first bar of the chart
+     */
     removeData: function () {
       this.scale.removeXLabel();
       //Then re-render the chart.
@@ -271,6 +372,10 @@
       }, this);
       this.update();
     },
+
+    /**
+     * Recompute the bars
+     */
     reflow: function () {
       helpers.extend(this.BarClass.prototype, {
         y: this.scale.endPoint,
@@ -282,6 +387,11 @@
       });
       this.scale.update(newScaleProps);
     },
+
+    /**
+     * Draw the chart
+     * @param ease
+     */
     draw: function (ease) {
       var easingDecimal = ease || 1;
       this.clear();
