@@ -266,6 +266,10 @@
      */
     resetActiveBars: function resetActiveBars () {
       this.activeBars.length = 0;
+      this.eachBars(function (bar) {
+        bar.restore(['fillColor', 'strokeColor']);
+      });
+      this.update();
     },
 
     /**
