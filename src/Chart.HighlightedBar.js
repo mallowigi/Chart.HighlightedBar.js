@@ -262,6 +262,13 @@
     },
 
     /**
+     * Reset active bars
+     */
+    resetActiveBars: function resetActiveBars () {
+      this.activeBars.length = 0;
+    },
+
+    /**
      * For each active bar, highlight it
      */
     highlightActiveBars: function highlightActiveBars () {
